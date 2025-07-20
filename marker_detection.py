@@ -5,15 +5,16 @@ from scipy.spatial import ConvexHull
 import pandas as pd
 
 from webcam import take_image
+from color_correction import create_color_correction, apply_color_correction_to_image
 import helpers as helpers
 
 
 if __name__ == "__main__":
     # Try to load test image, otherwise use webcam to capture one
-    # img_path = 'example_imgs/color_checker (7).jpg'
-    # settings = helpers.SquareConfig(75, [175, 325], 90)
-    img_path = 'example_imgs/color_checker_mini (1).jpg'
-    settings = helpers.SquareConfig(40, [195, 335], 170)
+    img_path = 'example_imgs/color_checker (4).jpg'
+    settings = helpers.SquareConfig(75, [175, 325], 90)
+    # img_path = 'example_imgs/color_checker_mini (1).jpg'
+    # settings = helpers.SquareConfig(40, [195, 335], 170)
 
     if os.path.exists(img_path):
         img = cv2.imread(img_path)
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         marker_centers_img = [np.mean(c[0], axis=0) for c in corners]
         marker_centers_rect = cv2.perspectiveTransform(np.array(marker_centers_img,
                                                                 dtype=np.float32)
-                                                        [None, :, :], H)[0]
+                                                       [None, :, :], H)[0]
         # Find the rectified positions for id1 and id2
         idx1 = np.where(ids.flatten() == id1)[0][0]
         idx2 = np.where(ids.flatten() == id2)[0][0]
@@ -83,7 +84,7 @@ if __name__ == "__main__":
             center_plus = region_center + perp_direction * shift_amount
             center_minus = region_center - perp_direction * shift_amount
             center_plus_img = helpers.perspective_transform_points(ordered, dst,
-                                                                    center_plus[None, :])[0]
+                                                                   center_plus[None, :])[0]
             center_minus_img = helpers.perspective_transform_points(ordered, dst,
                                                                     center_minus[None, :])[0]
             h_img, w_img = img_markers.shape[:2]
@@ -112,6 +113,9 @@ if __name__ == "__main__":
                 pts_int = square_img.astype(int).reshape((-1, 1, 2))
                 cv2.polylines(img_markers, [pts_int], isClosed=True, color=(0, 255, 0),
                               thickness=2)
+                cv2.imshow("corrected Image", img_markers)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
                 # Map label position as well
                 label_img = helpers.perspective_transform_points(ordered, dst,
                                                                  center_shifted[None, :])[0]
@@ -136,28 +140,20 @@ if __name__ == "__main__":
     df.loc[df['row_id'] == 3, 'row_id'] = 2
     df.loc[df['row_id'] == -1, 'row_id'] = 3
     df_sorted = df.sort_values(by=["row_id", "col_id"])
+    df_sorted.reset_index(drop=True, inplace=True)
+
+    # Check the orientation of the color checker
+    df_sorted = helpers.orient_color_checker(df_sorted)
 
     # Draw numbers at the center of each sorted square
-    i = 1
-    for idx, row in df_sorted.iterrows():
-        center = row['center']
-        # Map the rectified center back to the image perspective
-        center_img = helpers.perspective_transform_points(ordered, dst, np.array([center]))[0]
-        cv2.putText(
-            img_markers,
-            str(i),
-            (int(center_img[0]), int(center_img[1])),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 0, 255),
-            2,
-            cv2.LINE_AA
-        )
-        i += 1
+    img_markers = helpers.draw_square_numbers(img_markers, df_sorted, ordered, dst)
 
-    # TODO, could still be 180 degrees rotated > easy check if looking for black/white
-    # TODO: Write conversion function
+    M, df_sorted = create_color_correction(df_sorted)
+    # print(f"Color correction matrix M:\n{M}")
+    img_markers = apply_color_correction_to_image(img_markers, M)
 
-    cv2.imshow("Warped Image", img_markers)
+    cv2.imshow("corrected Image", img_markers)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    print(f"Color correction matrix M:\n{M}")
