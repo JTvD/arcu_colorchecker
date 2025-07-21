@@ -18,8 +18,8 @@ The colorchecker itself is the size of an A4, therefore the markers are created 
 To assist in setup, the place to put the colorchecker is marked with a gray square. An example of the printen A3:
 
 <div style="display: flex; gap: 10px; align-items: flex-start;">
-  <img src="images/normal_example.jpg" alt="Mini ColorChecker Example" style="width: 50%; max-width: 400px; height: auto;">
-  <img src="example_imgs/color_checker%20(1).jpg" alt="Mini ColorChecker Detected" style="width: 50%; max-width: 400px; height: auto;">
+  <img src="images/normal_example.jpg" alt="Mini ColorChecker Example" style="width: 48%; max-width: 400px; height: auto;">
+  <img src="example_imgs/color_checker%20(1).jpg" alt="Mini ColorChecker Detected" style="width: 48%; max-width: 400px; height: auto;">
 </div>
 
 **Calibrite ColorChecker Classic Mini (63.5 x 109mm)**
@@ -27,8 +27,8 @@ This colorchecker and markers still fit on an A4.
 To assist in setup, the place to put the colorchecker is marked with a gray square. An example of the printen A4:
 
 <div style="display: flex; gap: 10px; align-items: flex-start;">
-  <img src="images/mini_example.jpg" alt="Mini ColorChecker Example" style="width: 50%; max-width: 400px; height: auto;">
-  <img src="example_imgs/color_checker_mini%20(1).jpg" alt="Mini ColorChecker Detected" style="width: 50%; max-width: 400px; height: auto;">
+  <img src="images/mini_example.jpg" alt="Mini ColorChecker Example" style="width: 48%; max-width: 400px; height: auto;">
+  <img src="example_imgs/color_checker_mini%20(1).jpg" alt="Mini ColorChecker Detected" style="width: 48%; max-width: 400px; height: auto;">
 </div>
 
 The real color values are taken from [X-write support](https://www.xrite.com/service-support/new_color_specifications_for_colorchecker_sg_and_classic_charts)
@@ -43,6 +43,6 @@ After finding the squares and correcting for the orientation the average values 
 
 The following images give an imprssion of the corrected images with the debug markers on them:
 <div style="display: flex; gap: 10px; align-items: flex-start;">
-  <img src="images/example_mini_colorchecker.jpg" alt="Mini ColorChecker Example" style="width: 50%; max-width: 400px; height: auto;">
-  <img src="images/example_colorchecker.jpgjpg" alt="Mini ColorChecker Detected" style="width: 50%; max-width: 400px; height: auto;">
+  <img src="images/example_mini_colorchecker.jpg" alt="Mini ColorChecker Example" style="width: 48%; max-width: 400px; height: auto;">
+  <img src="images/example_colorchecker.jpg" alt="Mini ColorChecker Detected" style="width: 48%; max-width: 400px; height: auto;">
 </div>
