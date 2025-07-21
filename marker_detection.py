@@ -11,9 +11,11 @@ import helpers as helpers
 
 if __name__ == "__main__":
     # Try to load test image, otherwise use webcam to capture one
-    img_path = 'example_imgs/color_checker (4).jpg'
+    # Normal color checker
+    img_path = 'example_imgs/color_checker (7).jpg'
     settings = helpers.SquareConfig(75, [175, 325], 90)
-    # img_path = 'example_imgs/color_checker_mini (1).jpg'
+    # Mini color checker
+    # img_path = 'example_imgs/color_checker_mini (5).jpg'
     # settings = helpers.SquareConfig(40, [195, 335], 170)
 
     if os.path.exists(img_path):
@@ -87,10 +89,15 @@ if __name__ == "__main__":
                                                                    center_plus[None, :])[0]
             center_minus_img = helpers.perspective_transform_points(ordered, dst,
                                                                     center_minus[None, :])[0]
-            h_img, w_img = img_markers.shape[:2]
-            # Determine the shift sign based on distance to edges
-            if helpers.min_dist_to_edge(center_plus_img, h_img, w_img) >\
-               helpers.min_dist_to_edge(center_minus_img, h_img, w_img):
+            # Draw a point at center_minus_img for visualization
+            # cv2.circle(img_markers, (int(center_plus_img[0]),
+            #            int(center_plus_img[1])), 8, (255, 255, 0), -1)
+            # cv2.circle(img_markers, (int(center_minus_img[0]),
+            #            int(center_minus_img[1])), 8, (0, 0, 255), -1)
+            # Determine the shift sign based on distance to centroid of markers
+            marker_centers_img = [np.mean(c[0], axis=0) for c in corners]
+            if helpers.dist_to_center(center_plus_img, marker_centers_img) < \
+               helpers.dist_to_center(center_minus_img, marker_centers_img):
                 shift_sign = 1
             else:
                 shift_sign = -1
@@ -113,9 +120,6 @@ if __name__ == "__main__":
                 pts_int = square_img.astype(int).reshape((-1, 1, 2))
                 cv2.polylines(img_markers, [pts_int], isClosed=True, color=(0, 255, 0),
                               thickness=2)
-                cv2.imshow("corrected Image", img_markers)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
                 # Map label position as well
                 label_img = helpers.perspective_transform_points(ordered, dst,
                                                                  center_shifted[None, :])[0]
@@ -155,5 +159,6 @@ if __name__ == "__main__":
     cv2.imshow("corrected Image", img_markers)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    # cv2.imwrite("corrected_image.jpg", img_markers)
 
     print(f"Color correction matrix M:\n{M}")

@@ -154,10 +154,30 @@ def min_dist_to_edge(pt: tuple, w_img: int, h_img: int) -> int:
         w_img (int): Width of the image.
         h_img (int): Height of the image.
     Returns:
-        int: Maximum distance to the image edges.
+        int: Maximum distance from the point to any image edge.
     """
     x, y = pt
-    return max(x, w_img - x, y, h_img - y)
+    # Compute distances to each edge
+    dist_left = x
+    dist_right = w_img - x
+    dist_top = y
+    dist_bottom = h_img - y
+    return max(dist_left, dist_right, dist_top, dist_bottom)
+
+
+def dist_to_center(pt: tuple, marker_points: list | np.ndarray) -> float:
+    """
+    Calculates the Euclidean distance from a point to the centroid of the given marker points.
+    Args:
+        pt (tuple): A point (x, y) in the image.
+        marker_points (list | np.ndarray): List or array of marker (x, y) points.
+    Returns:
+        float: Distance from the point to the centroid of the markers.
+    """
+    x, y = pt
+    markers = np.asarray(marker_points)
+    centroid = np.mean(markers, axis=0)
+    return ((x - centroid[0]) ** 2 + (y - centroid[1]) ** 2) ** 0.5
 
 
 def draw_square_numbers(img_markers: np.ndarray, df_sorted: pd.DataFrame,
@@ -188,21 +208,30 @@ def orient_color_checker(df_sorted: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: Oriented DataFrame.
     """
     # Compute rgb_diff and rgb_sum if not already present
-    if 'rgb_diff' not in df_sorted.columns:
-        df_sorted['rgb_diff'] = df_sorted['color'].apply(lambda rgb: np.max(rgb) - np.min(rgb))
+    # if 'rgb_diff' not in df_sorted.columns:
+    #     df_sorted['rgb_diff'] = df_sorted['color'].apply(lambda rgb: np.max(rgb) - np.min(rgb))
     if 'rgb_sum' not in df_sorted.columns:
         df_sorted['rgb_sum'] = df_sorted['color'].apply(lambda rgb: np.sum(rgb))
 
-    idx_lowest_diff = df_sorted['rgb_diff'].idxmin()
+    # idx_lowest_diff = df_sorted['rgb_diff'].idxmin()
     idx_lowest_sum = df_sorted['rgb_sum'].idxmin()
-    if idx_lowest_diff != idx_lowest_sum or idx_lowest_diff not in [0, 23]:
+    # Check if the indexes are flipped: the squares are always drawn from the bottom of the image to the top
+    # Not for marker 1 to marker 2.
+    if idx_lowest_sum in [5, 18]:
+        df_sorted['col_id'] = 5 - df_sorted['col_id']
+        df_sorted = df_sorted.sort_values(by=["row_id", "col_id"])
+        df_sorted.reset_index(drop=True, inplace=True)
+        # idx_lowest_diff = df_sorted['rgb_diff'].idxmin()
+        idx_lowest_sum = df_sorted['rgb_sum'].idxmin()
+    # Ensure the black square is in position 0 or 23
+    if idx_lowest_sum not in [0, 23]:
         print(f"something went wrong, the black square should be in position 1 or 24, "
-              f"but found at {idx_lowest_diff} (diff) and {idx_lowest_sum} (sum).")
+              f"but found at {idx_lowest_sum} (sum).")
     else:
-        print(f"black square found at position {idx_lowest_diff + 1}")
+        print(f"black square found at position {idx_lowest_sum + 1}")
 
     # Flip if needed so black is in position 23
-    if idx_lowest_diff == 0:
+    if idx_lowest_sum == 0:
         df_sorted = df_sorted.iloc[::-1].reset_index(drop=True)
         print("Flipping the color checker horizontally to match the expected orientation.")
     return df_sorted
